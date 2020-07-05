@@ -20,6 +20,10 @@ class CreateTransactionService {
 
     if (validationType===true) throw Error("invalidy type")
 
+    const validationValue = this.transactionsRepository.validationValue({value,type});
+
+    if (validationValue===true) throw Error("value invalidy ")
+
     const transaction = this.transactionsRepository.create({ title, value, type: validationType.type })
     
     return transaction

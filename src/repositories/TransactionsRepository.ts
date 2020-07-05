@@ -5,9 +5,15 @@ interface Balance {
   outcome: number;
   total: number;
 }
+
 interface TypeBalance {
   type: 'income' | 'outcome';
 }
+
+interface ValueBalance {
+  type: 'income' | 'outcome';
+}
+
 interface CreateTransactionDTO {
   title: string;
   value: number;
@@ -26,7 +32,13 @@ class TransactionsRepository {
   }
 
   public getBalance(): Balance {
- // TODO
+    let outcome = 0
+    let income = 0
+    this.transactions.reduce((total, objects) => objects.type === "income" ? income += objects.value : outcome += objects.value, 0)
+
+    const balance = { income, outcome, total: income - outcome }
+
+    return balance
   }
 
   public create({ title, value, type }: CreateTransactionDTO): Transaction {
@@ -38,11 +50,21 @@ class TransactionsRepository {
   }
 
   public validationType(type: string): TypeBalance | true {
-    console.log(type)
+    
     if (type === "income" || type === "outcome") {
       return { type }
     }
+
     return true
+  }
+  public validationValue({ value, type }: { value: number, type: string }): false | true {
+    const balance = this.transactions.reduce((total, objects) => objects.type === "income" ? total += objects.value : total -= objects.value, 0)
+
+    if (type === "outcome" && balance < value) {
+      return true
+    }
+
+    return false
   }
 }
 
