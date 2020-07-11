@@ -1,31 +1,43 @@
+import { getCustomRepository } from "typeorm"
+
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
 
 interface Request {
   title: string;
   value: number;
-  type: string
+  type: string;
+  userId: string;
 }
 
 class CreateTransactionService {
-  private transactionsRepository: TransactionsRepository;
 
-  constructor(transactionsRepository: TransactionsRepository) {
-    this.transactionsRepository = transactionsRepository;
-  }
+  public async execute({ title, value, type, userId }: Request): Promise<Transaction> {
+    const transactionsRepository = getCustomRepository(TransactionsRepository);
 
-  public execute({ title, value, type }: Request): Transaction {
-    
-    const validationType = this.transactionsRepository.validationType(type);
 
-    if (validationType===true) throw Error("invalidy type")
+    const validationUser = await transactionsRepository.validationUser({ userId });
 
-    const validationValue = this.transactionsRepository.validationValue({value,type});
+    if (validationUser === true) throw Error("please send user")
 
-    if (validationValue===true) throw Error("value invalidy ")
 
-    const transaction = this.transactionsRepository.create({ title, value, type: validationType.type })
-    
+    const validationType = await transactionsRepository.validationType(type);
+
+    if (validationType === true) throw Error("invalidy type")
+
+    const validationValue = await transactionsRepository.validationValue({ value, type });
+
+    if (validationValue === true) throw Error("value invalidy ")
+
+    const transaction = transactionsRepository.create({
+      title,
+      value,
+      type: validationType.type,
+      user_id: userId
+    })
+
+    console.log(transaction)
+    await transactionsRepository.save(transaction)
     return transaction
   }
 }

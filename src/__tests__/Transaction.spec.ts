@@ -11,7 +11,7 @@ describe('Transaction', () => {
     });
 
     expect(isUuid(response.body.id)).toBe(true);
-
+    
     expect(response.body).toMatchObject({
       title: 'Loan',
       type: 'income',

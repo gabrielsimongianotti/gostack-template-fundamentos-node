@@ -1,4 +1,5 @@
 import Transaction from '../models/Transaction';
+import { EntityRepository, Repository } from "typeorm";
 
 interface Balance {
   income: number;
@@ -13,58 +14,62 @@ interface TypeBalance {
 interface ValueBalance {
   type: 'income' | 'outcome';
 }
-
-interface CreateTransactionDTO {
-  title: string;
-  value: number;
-  type: 'income' | 'outcome';
+interface typeUser {
+  userId: string
 }
+// interface CreateTransactionDTO {
+//   title: string;
+//   value: number;
+//   type: 'income' | 'outcome';
+// }
 
-class TransactionsRepository {
-  private transactions: Transaction[];
+@EntityRepository(Transaction)
+class TransactionsRepository extends Repository<Transaction>{
 
-  constructor() {
-    this.transactions = [];
-  }
-
-  public all(): Transaction[] {
-    return this.transactions;
-  }
-
-  public getBalance(): Balance {
+  public async getBalance(): Promise<Balance> {
     let outcome = 0
     let income = 0
-    this.transactions.reduce((total, objects) => objects.type === "income" ? income += objects.value : outcome += objects.value, 0)
+    let transactions = await this.find()
+    transactions.reduce((total, objects) => objects.type === "income" ? income += objects.value : outcome += objects.value, 0)
 
     const balance = { income, outcome, total: income - outcome }
 
     return balance
   }
 
-  public create({ title, value, type }: CreateTransactionDTO): Transaction {
-    const transaction = new Transaction({ title, value, type })
-
-    this.transactions.push(transaction)
-
-    return transaction
-  }
-
   public validationType(type: string): TypeBalance | true {
-    
+
     if (type === "income" || type === "outcome") {
       return { type }
     }
 
     return true
   }
-  public validationValue({ value, type }: { value: number, type: string }): false | true {
-    const balance = this.transactions.reduce((total, objects) => objects.type === "income" ? total += objects.value : total -= objects.value, 0)
+
+  public async validationValue({ value, type }: { value: number, type: string }): Promise<false | true> {
+    let transactions = await this.find()
+    const balance = transactions.reduce((total, objects) => objects.type === "income" ? total += objects.value : total -= objects.value, 0)
 
     if (type === "outcome" && balance < value) {
       return true
     }
 
     return false
+  }
+
+  public async validationUser({ userId }: typeUser): Promise<true | false> {
+    const checkUserExists = await this.find({      where: { user_id: userId }    })
+    let transactions = await this.find()
+
+    let checkUserExist = transactions.filter(( objects) => objects.user_id === userId)
+
+    console.log(checkUserExists.length,userId)
+
+    if (checkUserExists.length===0) {
+      return true
+    }
+    return false
+
   }
 }
 

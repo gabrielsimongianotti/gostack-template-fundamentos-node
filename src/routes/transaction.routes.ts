@@ -1,29 +1,39 @@
 import { Router } from 'express';
+import { getCustomRepository } from "typeorm";
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 
+import ensureAuthenticated from "../middlewares/ensureAuthenticated";
+
 const transactionRouter = Router();
 
-const transactionsRepository = new TransactionsRepository();
+transactionRouter.use(ensureAuthenticated)
 
-transactionRouter.get('/', (request, response) => {
+transactionRouter.get('/', async (request, response) => {
   try {
-    const transactions = transactionsRepository.all();
-    const balance =transactionsRepository.getBalance();
-    return  response.json({transactions,balance})
+
+    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const transactions = await transactionsRepository.find();
+    const balance = await transactionsRepository.getBalance();
+
+    return response.json({ transactions, balance })
+
   } catch (err) {
+
     return response.status(400).json({ error: err.message });
+    
   }
 });
 
-transactionRouter.post('/', (request, response) => {
+transactionRouter.post('/', async (request, response) => {
   try {
-    let { title, value, type } = request.body;
 
-    const createTransaction = new CreateTransactionService(transactionsRepository)
+    let { title, value, type, userId } = request.body;
 
-   const transaction= createTransaction.execute({ title, value, type })
+    const createTransaction = new CreateTransactionService()
+
+    const transaction = await createTransaction.execute({ title, value, type, userId })
 
     return response.json(transaction)
   } catch (err) {
