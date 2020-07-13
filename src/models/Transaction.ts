@@ -28,12 +28,7 @@ class Transaction {
 
   @UpdateDateColumn()
   updated_at: Date;
-  // constructor() {
-  //   this.id = uuid();
-    // this.title = title;
-    // this.value = value;
-    // this.type = type;
-  // }
+ 
 }
 
 export default Transaction;

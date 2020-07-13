@@ -11,9 +11,6 @@ interface TypeBalance {
   type: 'income' | 'outcome';
 }
 
-interface ValueBalance {
-  type: 'income' | 'outcome';
-}
 interface typeUser {
   userId: string
 }

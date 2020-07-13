@@ -2,6 +2,7 @@ import { getCustomRepository } from "typeorm"
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
+import AppError from "../errors/AppError";
 
 interface Request {
   title: string;
@@ -18,16 +19,16 @@ class CreateTransactionService {
 
     const validationUser = await transactionsRepository.validationUser({ userId });
 
-    if (validationUser === true) throw Error("please send user")
+    if (validationUser === true) throw new AppError("please send user")
 
 
     const validationType = await transactionsRepository.validationType(type);
 
-    if (validationType === true) throw Error("invalidy type")
+    if (validationType === true) throw new AppError("invalidy type",401)
 
     const validationValue = await transactionsRepository.validationValue({ value, type });
 
-    if (validationValue === true) throw Error("value invalidy ")
+    if (validationValue === true) throw new AppError("value invalidy ",401)
 
     const transaction = transactionsRepository.create({
       title,

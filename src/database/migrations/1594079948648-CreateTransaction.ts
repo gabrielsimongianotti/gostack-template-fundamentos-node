@@ -8,26 +8,26 @@ export default class CreateTransaction1594079948648 implements MigrationInterfac
         name: "Transaction",
         columns: [
           {
-            name: "id",
+            name: 'id',
             type: 'uuid',
-            generationStrategy: "uuid",
-            default:"uuid_generate_v4()",
             isPrimary: true,
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
           },
           {
             name: "title",
             type: 'varchar',
-            isNullable:false
+            isNullable: false
           },
           {
             name: "value",
             type: 'float8',
-            isNullable:false
+            isNullable: false
           },
           {
-            name:"type",
-            type:"varchar",
-            isNullable:false
+            name: "type",
+            type: "varchar",
+            isNullable: false
           },
           {
             name: "created_at",
